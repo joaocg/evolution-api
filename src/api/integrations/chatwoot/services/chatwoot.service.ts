@@ -935,7 +935,7 @@ export class ChatwootService {
        * Identificando se a mensage já foi enviada]
        */
       let messages = await this.cache.hGet('messages_chatwoot', sourceId);
-      if (messages) {
+      if (Object.keys(messages).length == 0) {
         this.logger.error('Message already sent to chatwoot.');
         unlinkSync(file);
         return;
