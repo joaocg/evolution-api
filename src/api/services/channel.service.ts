@@ -1022,7 +1022,7 @@ export class ChannelStartupService {
            */
           let reDate:any = data;
           let sourceId = reDate?.key?.id;
-          this.logger.error('Data sendo tratada: ' + reDate.stringify());
+          this.logger.error('Data sendo tratada: ' + JSON.stringify(reDate));
           if (sourceId) {
             let messages = this.chatwootCache.hGet('messages_webhook', sourceId);
             if (messages) {
