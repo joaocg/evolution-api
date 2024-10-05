@@ -1025,12 +1025,11 @@ export class ChannelStartupService {
           this.logger.error('Data sendo tratada: ' + JSON.stringify(reDate));
           if (sourceId) {
             let messages = await this.chatwootCache.hGet('messages_webhook', sourceId);
-            this.logger.error('MESSAGE: ' + messages + JSON.stringify(messages));
-            if (messages && Object.keys(messages).length > 0) {
+            if (messages != null && Object.keys(messages).length > 0) {
               this.logger.error('WebHook event {'+ event +'}, message already sent to chatwoot.');
               return;
             }
-            await this.chatwootCache.hSet('messages_webhook', sourceId, new Date().toISOString());
+            await this.chatwootCache.hSet('messages_webhook', sourceId, new Date().toString());
           }
 
           if (this.localWebhook.enabled && isURL(this.localWebhook.url, { require_tld: false })) {
