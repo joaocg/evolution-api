@@ -1025,6 +1025,7 @@ export class ChannelStartupService {
           this.logger.error('Data sendo tratada: ' + JSON.stringify(reDate));
           if (sourceId) {
             let messages = this.chatwootCache.hGet('messages_webhook', sourceId);
+            this.logger.error('MESSAGE: ' + messages);
             if (messages) {
               this.logger.error('WebHook event {'+ event +'}, message already sent to chatwoot.');
               return;
