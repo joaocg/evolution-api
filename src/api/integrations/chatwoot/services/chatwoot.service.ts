@@ -934,13 +934,13 @@ export class ChatwootService {
       /**
        * Identificando se a mensage já foi enviada]
        */
-      let messages = this.cache.hGet('messages_chatwoot', sourceId);
+      let messages = await this.cache.hGet('messages_chatwoot', sourceId);
       if (messages) {
-        this.logger.verbose('Message already sent to chatwoot.');
+        this.logger.error('Message already sent to chatwoot.');
         unlinkSync(file);
         return;
       }
-      this.cache.hSet('messages_chatwoot', sourceId, new Date().toISOString());
+      await this.cache.hSet('messages_chatwoot', sourceId, new Date().toISOString());
     }
 
     this.logger.verbose('get client to instance: ' + this.provider.instanceName);
