@@ -39,8 +39,7 @@ export class ChatwootService {
     private readonly waMonitor: WAMonitoringService,
     private readonly configService: ConfigService,
     private readonly repository: RepositoryBroker,
-    private readonly cache: ICache,
-    private readonly redisCache: CacheService,
+    private readonly cache: ICache
   ) {}
 
   private async getProvider(instance: InstanceDto) {
@@ -935,13 +934,13 @@ export class ChatwootService {
       /**
        * Identificando se a mensage já foi enviada]
        */
-      let messages = this.redisCache.hGet('messages', sourceId);
+      let messages = this.cache.hGet('messages', sourceId);
       if (messages) {
         this.logger.verbose('Message already sent to chatwoot.');
         unlinkSync(file);
         return;
       }
-      this.redisCache.hSet('messages', sourceId, new Date());
+      this.cache.hSet('messages', sourceId, new Date());
     }
 
     this.logger.verbose('get client to instance: ' + this.provider.instanceName);
