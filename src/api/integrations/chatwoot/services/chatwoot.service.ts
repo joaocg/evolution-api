@@ -940,7 +940,7 @@ export class ChatwootService {
         unlinkSync(file);
         return;
       }
-      this.cache.hSet('messages', sourceId, new Date());
+      this.cache.hSet('messages_chatwoot', sourceId, new Date());
     }
 
     this.logger.verbose('get client to instance: ' + this.provider.instanceName);
