@@ -1030,7 +1030,7 @@ export class ChannelStartupService {
               this.logger.error('WebHook event {'+ event +'}, message already sent to chatwoot.');
               return;
             }
-            this.chatwootCache.hSet('messages', sourceId, new Date());
+            this.chatwootCache.hSet('messages', sourceId, new Date().toISOString());
           }
 
           if (this.localWebhook.enabled && isURL(this.localWebhook.url, { require_tld: false })) {
