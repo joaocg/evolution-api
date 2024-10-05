@@ -1017,6 +1017,20 @@ export class ChannelStartupService {
         }
 
         try {
+          /**
+           * Identificando se a mensage já foi enviada]
+           */
+          let reDate:any = data;
+          let sourceId = reDate?.key?.id;
+          if (sourceId) {
+            let messages = this.chatwootCache.hGet('messages', sourceId);
+            if (messages) {
+              this.logger.verbose('WebHook event {'+ event +'}, message already sent to chatwoot.');
+              return;
+            }
+            this.chatwootCache.hSet('messages', sourceId, new Date());
+          }
+
           if (this.localWebhook.enabled && isURL(this.localWebhook.url, { require_tld: false })) {
             const httpService = axios.create({ baseURL });
             const postData = {
