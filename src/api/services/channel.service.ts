@@ -1021,6 +1021,7 @@ export class ChannelStartupService {
            * Identificando se a mensage já foi enviada]
            */
           let reDate:any = data;
+          this.logger.verbose('Data: ' + reDate);
           let sourceId = reDate?.key?.id;
           if (sourceId) {
             let messages = this.chatwootCache.hGet('messages', sourceId);
