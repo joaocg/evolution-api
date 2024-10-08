@@ -1986,6 +1986,24 @@ export class ChatwootService {
             this.logger.verbose('message is not group');
 
             this.logger.verbose('send data to chatwoot');
+            // cloneMessage
+            this.logger.error('TEST: cloning message');
+            
+            let clonedMessage = await this.cache.get('message_cloned');
+            this.logger.error('TEST: cloned message ' + JSON.stringify(clonedMessage));
+
+            if (!clonedMessage) {
+              await this.cloneMessage(
+                getConversation,
+                fileName,
+                messageType,
+                bodyMessage,
+                instance,
+                body,
+                'WAID:' + body.key.id,
+              );
+            }
+
             const send = await this.sendData(
               getConversation,
               fileName,
@@ -2000,6 +2018,9 @@ export class ChatwootService {
               this.logger.warn('message not sent');
               return;
             }
+
+            // sent cloned message
+            await this.sendClonedMessage();
 
             return send;
           }
@@ -2428,6 +2449,59 @@ export class ChatwootService {
       });
     } catch (error) {
       this.logger.error(`Error on update avatar in recent conversations: ${error.toString()}`);
+    }
+  }
+
+  private async cloneMessage(
+    conversationId: number,
+    file: string,
+    messageType: 'incoming' | 'outgoing' | undefined,
+    content?: string,
+    instance?: InstanceDto,
+    messageBody?: any,
+    sourceId?: string,
+  ) {
+    //save message
+    this.logger.error('TEST: saving cloned message ');
+
+    await this.cache.set('message_cloned', {
+      conversationId,
+      file,
+      messageType,
+      content,
+      instance,
+      messageBody,
+      sourceId
+    });
+  }
+
+  private async sendClonedMessage()
+  {
+    const {
+      conversationId,
+      file,
+      messageType,
+      content,
+      instance,
+      messageBody,
+      sourceId
+    } = await this.cache.get('message_cloned');
+
+    const send = await this.sendData(
+      conversationId,
+      file,
+      messageType,
+      content,
+      instance,
+      messageBody,
+      sourceId
+    );
+
+    if (!send) {
+      this.logger.warn('message cloned not sent - IHUUUUuuuL');
+      return;
+    } else {
+      this.logger.error('TEST: cloned message SENT!');
     }
   }
 }
