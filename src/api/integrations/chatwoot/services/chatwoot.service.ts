@@ -930,21 +930,23 @@ export class ChatwootService {
     
     if (sourceId) {
       data.append('source_id', sourceId);
-      /**
-       * Identificando se a mensage já foi enviada]
-       */
-      let reDate:any = data;
-      let keyId = reDate?.key?.id;
-      if (keyId) {
-        let messages = await this.cache.hGet('messages_chatwoot', keyId.toString());
-        if (messages != null && Object.keys(messages).length > 0) {
-          this.logger.error('Message already sent to chatwoot.');
-          unlinkSync(file);
-          return;
-        }
-        await this.cache.hSet('messages_chatwoot', keyId.toString(), new Date().toString());
-        this.logger.error('SET CHATWOOT: ' + keyId.toString());
+    }
+
+    /**
+     * Identificando se a mensage já foi enviada]
+     */
+    
+    let reDate:any = data;
+    let keyId = reDate?.key?.id;
+    if (keyId) {
+      let messages = await this.cache.hGet('messages_chatwoot', keyId.toString());
+      if (messages != null && Object.keys(messages).length > 0) {
+        this.logger.error('Message already sent to chatwoot.');
+        unlinkSync(file);
+        return;
       }
+      await this.cache.hSet('messages_chatwoot', keyId.toString(), new Date().toString());
+      this.logger.error('SET CHATWOOT: ' + keyId.toString());
     }
 
     this.logger.verbose('get client to instance: ' + this.provider.instanceName);
