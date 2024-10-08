@@ -778,6 +778,23 @@ export class ChatwootService {
 
     const replyToIds = await this.getReplyToIds(messageBody, instance);
 
+
+    /**
+     * Identificando se a mensagem já foi enviada
+     */
+    
+    let reDate:any = messageBody;
+    let keyId = reDate?.key?.id;
+    if (keyId) {
+      let messages = await this.cache.hGet('message_creation_chatwoot', keyId.toString());
+      if (messages != null && Object.keys(messages).length > 0) {
+        this.logger.error('Message already sent to chatwoot. While creating!');
+        return null;
+      }
+      await this.cache.hSet('message_creation_chatwoot', keyId.toString(), new Date().toString());
+      this.logger.error('SET MESSAGE CREATION CHATWOOT: ' + keyId.toString());
+    }
+
     this.logger.verbose('create message in chatwoot');
     const message = await client.messages.create({
       accountId: this.provider.account_id,
