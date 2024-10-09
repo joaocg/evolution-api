@@ -795,28 +795,6 @@ export class ChatwootService {
       this.logger.error('SET MESSAGE CREATION CHATWOOT: ' + keyId.toString());
     }
 
-    // cloneMessage
-    this.logger.error('TEST: cloning message');
-            
-    let clonedMessage = await this.cache.get('message_cloned_2');
-    this.logger.error('TEST: cloned 2 message ' + JSON.stringify(clonedMessage));
-
-    if (!clonedMessage) {
-      await this.cloneMessage2({
-        accountId: this.provider.account_id,
-        conversationId: conversationId,
-        data: {
-          content: content,
-          message_type: messageType,
-          attachments: attachments,
-          private: privateMessage || false,
-          source_id: sourceId,
-          content_attributes: {
-            ...replyToIds,
-          },
-        },
-      });
-    }
 
     this.logger.verbose('create message in chatwoot');
     const message = await client.messages.create({
@@ -841,17 +819,6 @@ export class ChatwootService {
 
     this.logger.verbose('message created');
 
-    if(clonedMessage) {
-      this.logger.error('Starting creating CLONED message');
-  
-      const message2 = await client.messages.create(clonedMessage);
-  
-      if (!message2) {
-        this.logger.warn('message2 not found');
-        return null;
-      }
-      this.logger.error('CLONED message2 created');
-    }
 
 
     return message;
@@ -2039,23 +2006,6 @@ export class ChatwootService {
             this.logger.verbose('message is not group');
 
             this.logger.verbose('send data to chatwoot');
-            // cloneMessage
-            this.logger.error('TEST: cloning message');
-            
-            let clonedMessage = await this.cache.get('message_cloned');
-            this.logger.error('TEST: cloned message ' + JSON.stringify(clonedMessage));
-
-            if (!clonedMessage) {
-              await this.cloneMessage(
-                getConversation,
-                fileName,
-                messageType,
-                bodyMessage,
-                instance,
-                body,
-                'WAID:' + body.key.id,
-              );
-            }
 
             const send = await this.sendData(
               getConversation,
@@ -2071,9 +2021,6 @@ export class ChatwootService {
               this.logger.warn('message not sent');
               return;
             }
-
-            // sent cloned message
-            await this.sendClonedMessage();
 
             return send;
           }
@@ -2195,6 +2142,25 @@ export class ChatwootService {
         } else {
           this.logger.verbose('message is not group');
 
+          // cloneMessage
+          this.logger.error('TEST: cloning message');
+            
+          let clonedMessage = await this.cache.get('message_cloned');
+          this.logger.error('TEST: cloned message ' + JSON.stringify(clonedMessage));
+
+          if (!clonedMessage) {
+            await this.cloneMessage(
+              instance,
+              getConversation,
+              bodyMessage,
+              messageType,
+              false,
+              [],
+              body,
+              'WAID:' + body.key.id,
+            );
+          }
+
           this.logger.verbose('send data to chatwoot');
           const send = await this.createMessage(
             instance,
@@ -2211,6 +2177,9 @@ export class ChatwootService {
             this.logger.warn('message not sent');
             return;
           }
+
+          // sent cloned message
+          await this.sendClonedMessage();
 
           return send;
         }
@@ -2506,11 +2475,16 @@ export class ChatwootService {
   }
 
   private async cloneMessage(
+    instance: InstanceDto,
     conversationId: number,
-    file: string,
+    content: string,
     messageType: 'incoming' | 'outgoing' | undefined,
-    content?: string,
-    instance?: InstanceDto,
+    privateMessage?: boolean,
+    attachments?: {
+      content: unknown;
+      encoding: string;
+      filename: string;
+    }[],
     messageBody?: any,
     sourceId?: string,
   ) {
@@ -2518,45 +2492,39 @@ export class ChatwootService {
     this.logger.error('TEST: saving cloned message ');
 
     await this.cache.set('message_cloned', {
-      conversationId,
-      file,
-      messageType,
-      content,
       instance,
+      conversationId,
+      content,
+      messageType,
+      privateMessage,
+      attachments,
       messageBody,
-      sourceId
+      sourceId,
     });
-  }
-
-  private async cloneMessage2(
-    message: any,
-  ) {
-    //save message
-    this.logger.error('TEST: saving cloned 2 message ');
-
-    await this.cache.set('message_cloned_2', message);
   }
 
   private async sendClonedMessage()
   {
     const {
-      conversationId,
-      file,
-      messageType,
-      content,
       instance,
+      conversationId,
+      content,
+      messageType,
+      privateMessage,
+      attachments,
       messageBody,
-      sourceId
+      sourceId,
     } = await this.cache.get('message_cloned');
 
-    const send = await this.sendData(
-      conversationId,
-      file,
-      messageType,
-      content,
+    const send = await this.createMessage(
       instance,
+      conversationId,
+      content,
+      messageType,
+      privateMessage,
+      attachments,
       messageBody,
-      sourceId
+      sourceId,
     );
 
     if (!send) {
@@ -2567,25 +2535,4 @@ export class ChatwootService {
     }
   }
 
-  private async sendClonedMessage2()
-  {
-    const message = await this.cache.get('message_cloned_2');
-
-    const send = await this.sendData(
-      conversationId,
-      file,
-      messageType,
-      content,
-      instance,
-      messageBody,
-      sourceId
-    );
-
-    if (!send) {
-      this.logger.warn('message cloned not sent - IHUUUUuuuL');
-      return;
-    } else {
-      this.logger.error('TEST: cloned message SENT!');
-    }
-  }
 }
