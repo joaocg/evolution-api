@@ -2143,23 +2143,23 @@ export class ChatwootService {
           this.logger.verbose('message is not group');
 
           // cloneMessage
-          this.logger.error('TEST: cloning message');
+          // this.logger.error('TEST: cloning message');
             
-          let clonedMessage = await this.cache.get('message_cloned');
-          this.logger.error('TEST: cloned message ' + JSON.stringify(clonedMessage));
+          // let clonedMessage = await this.cache.get('message_cloned');
+          // this.logger.error('TEST: cloned message ' + JSON.stringify(clonedMessage));
 
-          if (!clonedMessage) {
-            await this.cloneMessage(
-              instance,
-              getConversation,
-              bodyMessage,
-              messageType,
-              false,
-              [],
-              body,
-              'WAID:' + body.key.id,
-            );
-          }
+          // if (!clonedMessage) {
+          //   await this.cloneMessage(
+          //     instance,
+          //     getConversation,
+          //     bodyMessage,
+          //     messageType,
+          //     false,
+          //     [],
+          //     body,
+          //     'WAID:' + body.key.id,
+          //   );
+          // }
 
           this.logger.verbose('send data to chatwoot');
           const send = await this.createMessage(
@@ -2179,7 +2179,7 @@ export class ChatwootService {
           }
 
           // sent cloned message
-          await this.sendClonedMessage();
+          // await this.sendClonedMessage();
 
           return send;
         }
