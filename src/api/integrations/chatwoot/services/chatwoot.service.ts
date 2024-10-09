@@ -795,6 +795,29 @@ export class ChatwootService {
       this.logger.error('SET MESSAGE CREATION CHATWOOT: ' + keyId.toString());
     }
 
+    // cloneMessage
+    this.logger.error('TEST: cloning message');
+            
+    let clonedMessage = await this.cache.get('message_cloned_2');
+    this.logger.error('TEST: cloned 2 message ' + JSON.stringify(clonedMessage));
+
+    if (!clonedMessage) {
+      await this.cloneMessage2({
+        accountId: this.provider.account_id,
+        conversationId: conversationId,
+        data: {
+          content: content,
+          message_type: messageType,
+          attachments: attachments,
+          private: privateMessage || false,
+          source_id: sourceId,
+          content_attributes: {
+            ...replyToIds,
+          },
+        },
+      });
+    }
+
     this.logger.verbose('create message in chatwoot');
     const message = await client.messages.create({
       accountId: this.provider.account_id,
@@ -817,6 +840,19 @@ export class ChatwootService {
     }
 
     this.logger.verbose('message created');
+
+    if(clonedMessage) {
+      this.logger.error('Starting creating CLONED message');
+  
+      const message2 = await client.messages.create(clonedMessage);
+  
+      if (!message2) {
+        this.logger.warn('message2 not found');
+        return null;
+      }
+      this.logger.error('CLONED message2 created');
+    }
+
 
     return message;
   }
@@ -2492,6 +2528,15 @@ export class ChatwootService {
     });
   }
 
+  private async cloneMessage2(
+    message: any,
+  ) {
+    //save message
+    this.logger.error('TEST: saving cloned 2 message ');
+
+    await this.cache.set('message_cloned_2', message);
+  }
+
   private async sendClonedMessage()
   {
     const {
@@ -2503,6 +2548,28 @@ export class ChatwootService {
       messageBody,
       sourceId
     } = await this.cache.get('message_cloned');
+
+    const send = await this.sendData(
+      conversationId,
+      file,
+      messageType,
+      content,
+      instance,
+      messageBody,
+      sourceId
+    );
+
+    if (!send) {
+      this.logger.warn('message cloned not sent - IHUUUUuuuL');
+      return;
+    } else {
+      this.logger.error('TEST: cloned message SENT!');
+    }
+  }
+
+  private async sendClonedMessage2()
+  {
+    const message = await this.cache.get('message_cloned_2');
 
     const send = await this.sendData(
       conversationId,
